@@ -1,0 +1,4 @@
+cd data
+pdflatex resume.tex
+pdftoppm -png resume.pdf > resume.png
+
