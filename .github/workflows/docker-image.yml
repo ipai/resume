@@ -11,18 +11,24 @@ jobs:
     name: Compile resume pdf
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
+      - name: "Check out the repo"
         uses: actions/checkout@v4
-      - name: Run the build process with Docker
+      - name: "Run the build process with Docker"
         uses: addnab/docker-run-action@v3
         with:
           image: thomasweise/docker-texlive-full:latest
           options: -v ${{ github.workspace }}:/data
           run: |
             cd data
-            pdflatex resume.tex
-            pdftoppm -png resume.pdf > resume.png
-            make4ht resume.tex
-      - uses: stefanzweifel/git-auto-commit-action@v5
+            pdflatex -output-directory=out resume.tex
+            pdftoppm -png out/resume.pdf > out/resume.png
+      - name: "R2 Upload Action"
+        uses: ryand56/r2-upload-action@v1.4
         with:
-          commit_message: Apply pdflatex changes
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: out
+          destination-dir: ./resume/
+
