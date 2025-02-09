@@ -1,5 +1,4 @@
 cd data
-pdflatex resume.tex
-pdftoppm -png resume.pdf > resume.png
-make4ht resume.tex
+pdflatex -output-directory=out resume.tex
+pdftoppm -png out/resume.pdf > out/resume.png
 
