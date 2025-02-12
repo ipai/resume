@@ -42,8 +42,9 @@ jobs:
             sh <<EOF
               cd /data
               pdftoppm -png out/resume.pdf > out/resume.png
-              convert out/resume.png -resize 700x906 out/resume.resized.webp && \
-              convert out/resume.png -resize 906x700 out/resume.resized.png
+              convert out/resume.png -resize 700x906 -quality 100 out/resume.resized.webp
+              convert out/resume.png -resize 906x700 -quality 100 out/resume.resized.png
+              rm out/resume.aux out/resume.log out/resume.out
             EOF
 
       - name: "Commit changes and push"
