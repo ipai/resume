@@ -7,25 +7,49 @@ on:
     branches: [ main ]
 
 jobs:
-  compile:
-    name: Compile resume pdf
+  build-and-deploy:
+    name: Build, Convert and Deploy
     runs-on: ubuntu-latest
     steps:
       - name: "Check out the repo"
         uses: actions/checkout@v4
-      - name: "Run the build process with Docker"
+
+      - name: "Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+
+      - name: "Build Docker image"
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: resume-builder:latest
+
+      - name: "Generate PDF"
         uses: addnab/docker-run-action@v3
         with:
-          image: thomasweise/docker-texlive-full:latest
+          image: resume-builder:latest
           options: -v ${{ github.workspace }}:/data
           run: |
-            cd data
+            mkdir -p out
             pdflatex -output-directory=out resume.tex
-            pdftoppm -png out/resume.pdf > out/resume.png
+
+      - name: "Convert to PNG and WebP"
+        uses: addnab/docker-run-action@v3
+        with:
+          image: resume-builder:latest
+          options: -v ${{ github.workspace }}:/data
+          run: |
+            sh <<EOF
+              cd /data
+              pdftoppm -png out/resume.pdf > out/resume.png
+              cwebp -resize 700 906 -q 100 out/resume.png -o out/resume.resized.webp
+            EOF
+
       - name: "Commit changes and push"
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Apply pdflatex changes
+
       - name: "R2 Upload Action"
         uses: ryand56/r2-upload-action@v1.4
         with:
@@ -35,4 +59,3 @@ jobs:
           r2-bucket: ${{ secrets.R2_BUCKET }}
           source-dir: out
           destination-dir: ./resume/
-
