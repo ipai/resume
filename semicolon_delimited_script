@@ -1,8 +1,9 @@
-sh <<EOF
-  cd /data
-  pdftoppm -png out/resume.pdf > out/resume.png
-  convert out/resume.png -resize 700x906 -quality 100 out/resume.resized.webp
-  convert out/resume.png -resize 906x700 -quality 100 out/resume.resized.png
+sh -c "\
+  cd /data && \
+  pdflatex -output-directory=out resume.tex && \
+  pdftoppm -png out/resume.pdf > out/resume.png && \
+  convert out/resume.png -quality 100 out/resume.webp && \
+  sleep 1 && \
   rm out/resume.aux out/resume.log out/resume.out
-EOF
+"
 
