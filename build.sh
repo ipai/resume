@@ -1,6 +1,6 @@
 #!/bin/sh
 
-docker build -t resume-builder .
+docker buildx install
 mkdir -p out
 docker run --rm -v "$(pwd):/data" resume-builder sh -c "\
     pdflatex -output-directory=out resume.tex && \
